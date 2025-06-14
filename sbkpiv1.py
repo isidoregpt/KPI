@@ -356,7 +356,12 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['dso']['value'],
-            number = {'suffix': " days", 'font': {'size': 20, 'color': "#1f2937"}},
+            number = {
+                'suffix': " days", 
+                'font': {'size': 20, 'color': "#1f2937"},
+                'valueformat': '.1f',
+                'y': 0.4  # Move text up
+            },
             gauge = {
                 'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#3b82f6", 'thickness': 0.7},
@@ -377,7 +382,12 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['dpo']['value'],
-            number = {'suffix': " days", 'font': {'size': 20, 'color': "#1f2937"}},
+            number = {
+                'suffix': " days", 
+                'font': {'size': 20, 'color': "#1f2937"},
+                'valueformat': '.1f',
+                'y': 0.4  # Move text up
+            },
             gauge = {
                 'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#10b981", 'thickness': 0.7},
@@ -398,7 +408,12 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['ebitda_margin']['value'],
-            number = {'suffix': "%", 'font': {'size': 20, 'color': "#1f2937"}},
+            number = {
+                'suffix': "%", 
+                'font': {'size': 20, 'color': "#1f2937"},
+                'valueformat': '.2f',
+                'y': 0.4  # Move text up
+            },
             gauge = {
                 'axis': {'range': [None, 25], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#f59e0b", 'thickness': 0.7},
@@ -419,7 +434,12 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['revenue_growth']['value'],
-            number = {'suffix': "%", 'font': {'size': 20, 'color': "#1f2937"}},
+            number = {
+                'suffix': "%", 
+                'font': {'size': 20, 'color': "#1f2937"},
+                'valueformat': '.2f',
+                'y': 0.4  # Move text up
+            },
             gauge = {
                 'axis': {'range': [-10, 30], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#8b5cf6", 'thickness': 0.7},

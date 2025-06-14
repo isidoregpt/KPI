@@ -359,9 +359,9 @@ def create_executive_charts(financial_data):
             number = {
                 'suffix': " days", 
                 'font': {'size': 20, 'color': "#1f2937"},
-                'valueformat': '.1f',
-                'y': 0.4  # Move text up
+                'valueformat': '.1f'
             },
+            domain = {'x': [0, 1], 'y': [0, 1]},
             gauge = {
                 'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#3b82f6", 'thickness': 0.7},
@@ -385,9 +385,9 @@ def create_executive_charts(financial_data):
             number = {
                 'suffix': " days", 
                 'font': {'size': 20, 'color': "#1f2937"},
-                'valueformat': '.1f',
-                'y': 0.4  # Move text up
+                'valueformat': '.1f'
             },
+            domain = {'x': [0, 1], 'y': [0, 1]},
             gauge = {
                 'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#10b981", 'thickness': 0.7},
@@ -411,9 +411,9 @@ def create_executive_charts(financial_data):
             number = {
                 'suffix': "%", 
                 'font': {'size': 20, 'color': "#1f2937"},
-                'valueformat': '.2f',
-                'y': 0.4  # Move text up
+                'valueformat': '.2f'
             },
+            domain = {'x': [0, 1], 'y': [0, 1]},
             gauge = {
                 'axis': {'range': [None, 25], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#f59e0b", 'thickness': 0.7},
@@ -437,9 +437,9 @@ def create_executive_charts(financial_data):
             number = {
                 'suffix': "%", 
                 'font': {'size': 20, 'color': "#1f2937"},
-                'valueformat': '.2f',
-                'y': 0.4  # Move text up
+                'valueformat': '.2f'
             },
+            domain = {'x': [0, 1], 'y': [0, 1]},
             gauge = {
                 'axis': {'range': [-10, 30], 'tickwidth': 1, 'tickcolor': "#6b7280"},
                 'bar': {'color': "#8b5cf6", 'thickness': 0.7},

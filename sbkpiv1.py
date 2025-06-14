@@ -152,60 +152,96 @@ class KPICalculator:
     def __init__(self, financial_data):
         self.data = financial_data
     
-    def calculate_all_kpis(self):
-        """Calculate all required KPIs"""
+    def calculate_all_kpis(self, period_view="Trailing 12 Months"):
+        """Calculate all required KPIs with period filtering"""
         if not self.data:
             return None
         
         try:
-            # Get most recent month data
-            current_idx = -1
-            prior_idx = -2
+            # Determine data range based on period selection
+            if period_view == "Monthly":
+                # Use last month only
+                data_range = slice(-1, None)
+                months_back = 1
+            elif period_view == "Quarterly": 
+                # Use last 3 months (quarter)
+                data_range = slice(-3, None)
+                months_back = 3
+            else:  # Trailing 12 Months
+                # Use last 12 months
+                data_range = slice(-12, None)
+                months_back = 12
             
-            # Days Sales Outstanding (DSO)
-            current_ar = self.data['accounts_receivable'][current_idx]
-            current_revenue = self.data['revenue'][current_idx]
+            # Get period data
+            period_revenue = self.data['revenue'][data_range]
+            period_ar = self.data['accounts_receivable'][data_range]
+            period_inventory = self.data['inventory'][data_range]
+            period_ap = self.data['accounts_payable'][data_range]
+            period_current_assets = self.data['current_assets'][data_range]
+            period_current_liabilities = self.data['current_liabilities'][data_range]
+            period_ebitda = self.data['ebitda'][data_range]
+            
+            if 'sga_expenses' in self.data:
+                period_sga = self.data['sga_expenses'][data_range]
+            else:
+                period_sga = self.data['operating_expenses'][data_range]
+            
+            # Calculate averages or sums based on period
+            if period_view == "Monthly":
+                # For monthly, use current month values
+                current_revenue = period_revenue[-1] if period_revenue else 0
+                current_ar = period_ar[-1] if period_ar else 0
+                current_inventory = period_inventory[-1] if period_inventory else 0
+                current_ap = period_ap[-1] if period_ap else 0
+                current_assets = period_current_assets[-1] if period_current_assets else 0
+                current_liabilities = period_current_liabilities[-1] if period_current_liabilities else 0
+                current_ebitda = period_ebitda[-1] if period_ebitda else 0
+                current_sga = period_sga[-1] if period_sga else 0
+                
+                # For growth, compare to same month prior year
+                prior_revenue = self.data['revenue'][-13] if len(self.data['revenue']) > 12 else self.data['revenue'][0]
+                
+            else:
+                # For quarterly/TTM, use averages for ratios, sums for totals
+                current_revenue = sum(period_revenue) / len(period_revenue) if period_revenue else 0
+                current_ar = sum(period_ar) / len(period_ar) if period_ar else 0
+                current_inventory = sum(period_inventory) / len(period_inventory) if period_inventory else 0
+                current_ap = sum(period_ap) / len(period_ap) if period_ap else 0
+                current_assets = sum(period_current_assets) / len(period_current_assets) if period_current_assets else 0
+                current_liabilities = sum(period_current_liabilities) / len(period_current_liabilities) if period_current_liabilities else 0
+                current_ebitda = sum(period_ebitda) / len(period_ebitda) if period_ebitda else 0
+                current_sga = sum(period_sga) / len(period_sga) if period_sga else 0
+                
+                # For growth, compare current period to same period prior year
+                if len(self.data['revenue']) > months_back:
+                    prior_period_revenue = self.data['revenue'][-(months_back*2):-months_back]
+                    prior_revenue = sum(prior_period_revenue) / len(prior_period_revenue) if prior_period_revenue else self.data['revenue'][0]
+                else:
+                    prior_revenue = self.data['revenue'][0]
+            
+            # Calculate KPIs
             dso = (current_ar / current_revenue) * 30 if current_revenue > 0 else 0
-            
-            # Days Payables Outstanding (DPO)
-            current_ap = self.data['accounts_payable'][current_idx]
             dpo = (current_ap / current_revenue) * 30 if current_revenue > 0 else 0
-            
-            # Days Inventory on Hand (DIO)
-            current_inventory = self.data['inventory'][current_idx]
             dio = (current_inventory / current_revenue) * 30 if current_revenue > 0 else 0
-            
-            # Working Capital
-            current_assets = self.data['current_assets'][current_idx]
-            current_liabilities = self.data['current_liabilities'][current_idx]
             working_capital = current_assets - current_liabilities
+            revenue_growth = ((current_revenue - prior_revenue) / prior_revenue) * 100 if prior_revenue > 0 else 0
+            ebitda_margin = (current_ebitda / current_revenue) * 100 if current_revenue > 0 else 0
+            sga_percentage = (current_sga / current_revenue) * 100 if current_revenue > 0 else 0
             
-            # Revenue Growth Rate (YoY)
-            current_revenue_val = self.data['revenue'][current_idx]
-            prior_year_revenue = self.data['revenue'][current_idx - 12] if len(self.data['revenue']) > 12 else self.data['revenue'][0]
-            revenue_growth = ((current_revenue_val - prior_year_revenue) / prior_year_revenue) * 100 if prior_year_revenue > 0 else 0
+            # AR Change calculation
+            if len(period_ar) >= 2:
+                ar_change = period_ar[-1] - period_ar[-2]
+            else:
+                ar_change = 0
             
-            # EBITDA Margin
-            current_ebitda = self.data['ebitda'][current_idx]
-            ebitda_margin = (current_ebitda / current_revenue_val) * 100 if current_revenue_val > 0 else 0
-            
-            # SG&A as % of Revenue
-            current_sga = self.data['sga_expenses'][current_idx] if 'sga_expenses' in self.data else current_opex
-            sga_percentage = (current_sga / current_revenue_val) * 100 if current_revenue_val > 0 else 0
-            
-            # Change in AR
-            prior_ar = self.data['accounts_receivable'][prior_idx]
-            ar_change = current_ar - prior_ar
-            
-            # Cash Conversion Cycle
             cash_conversion_cycle = dso + dio - dpo
             
-            # TTM calculations
+            # TTM calculations for summary metrics
             ttm_revenue = sum(self.data['revenue'][-12:]) if len(self.data['revenue']) >= 12 else sum(self.data['revenue'])
             ttm_ebitda = sum(self.data['ebitda'][-12:]) if len(self.data['ebitda']) >= 12 else sum(self.data['ebitda'])
             
-            # Net Debt to EBITDA (simplified - assuming some debt)
-            estimated_debt = current_liabilities * 0.3  # Simplified assumption
+            # Net Debt to EBITDA (simplified)
+            estimated_debt = current_liabilities * 0.3
             net_debt_to_ebitda = estimated_debt / ttm_ebitda if ttm_ebitda > 0 else 0
             
             return {
@@ -220,7 +256,8 @@ class KPICalculator:
                 'cash_conversion_cycle': {'value': cash_conversion_cycle, 'format': 'days', 'target': 30, 'status': 'good' if cash_conversion_cycle < 30 else 'warning'},
                 'ttm_revenue': {'value': ttm_revenue, 'format': 'currency'},
                 'ttm_ebitda': {'value': ttm_ebitda, 'format': 'currency'},
-                'net_debt_to_ebitda': {'value': net_debt_to_ebitda, 'format': 'ratio', 'target': 3, 'status': 'good' if net_debt_to_ebitda < 3 else 'warning'}
+                'net_debt_to_ebitda': {'value': net_debt_to_ebitda, 'format': 'ratio', 'target': 3, 'status': 'good' if net_debt_to_ebitda < 3 else 'warning'},
+                'period_info': f"{period_view} Analysis"
             }
         except Exception as e:
             st.error(f"Error calculating KPIs: {str(e)}")
@@ -246,7 +283,7 @@ def format_number(value, format_type):
     else:
         return f"{value:,.1f}"
 
-def create_kpi_card(title, value, format_type, target=None, status=None):
+def create_kpi_card(title, value, format_type, target=None, status=None, show_targets=True):
     """Create a KPI card component"""
     formatted_value = format_number(value, format_type)
     
@@ -254,7 +291,7 @@ def create_kpi_card(title, value, format_type, target=None, status=None):
     if status:
         status_class = f"status-{status}"
     
-    target_text = f"Target: {format_number(target, format_type)}" if target else ""
+    target_text = f"Target: {format_number(target, format_type)}" if target and show_targets else ""
     
     card_html = f"""
     <div class="kpi-card {status_class}">
@@ -627,11 +664,20 @@ def main():
         period_view = st.selectbox(
             "Select View Period",
             ["Monthly", "Quarterly", "Trailing 12 Months"],
-            index=2
+            index=2,
+            key="period_selector"
         )
         
-        show_targets = st.checkbox("Show Performance Targets", value=True)
-        show_trends = st.checkbox("Show Trend Indicators", value=True)
+        show_targets = st.checkbox("Show Performance Targets", value=True, key="show_targets")
+        show_trends = st.checkbox("Show Trend Indicators", value=True, key="show_trends")
+        
+        # Period filter explanation
+        if period_view == "Monthly":
+            st.info("📅 Showing: Individual month data")
+        elif period_view == "Quarterly":
+            st.info("📅 Showing: Quarterly aggregated data")  
+        else:
+            st.info("📅 Showing: Trailing 12-month data")
     
     # Main dashboard content
     if not st.session_state.data_loaded:
@@ -658,10 +704,19 @@ def main():
     else:
         # Dashboard content
         financial_data = st.session_state.processor.processed_data
+        
+        # Get dashboard options from sidebar
+        period_view = st.session_state.get('period_selector', 'Trailing 12 Months')
+        show_targets = st.session_state.get('show_targets', True)
+        show_trends = st.session_state.get('show_trends', True)
+        
         calculator = KPICalculator(financial_data)
-        kpis = calculator.calculate_all_kpis()
+        kpis = calculator.calculate_all_kpis(period_view)
         
         if kpis:
+            # Period indicator
+            st.info(f"📊 **Current View**: {kpis.get('period_info', period_view)}")
+            
             # Executive Summary
             st.markdown("## 📈 Executive Summary")
             
@@ -672,6 +727,7 @@ def main():
                     "TTM Revenue", 
                     kpis['ttm_revenue']['value'], 
                     'currency',
+                    show_targets=show_targets,
                     status='good'
                 ), unsafe_allow_html=True)
             
@@ -680,6 +736,7 @@ def main():
                     "TTM EBITDA", 
                     kpis['ttm_ebitda']['value'], 
                     'currency',
+                    show_targets=show_targets,
                     status='good'
                 ), unsafe_allow_html=True)
             
@@ -689,7 +746,8 @@ def main():
                     kpis['ebitda_margin']['value'], 
                     'percentage',
                     target=kpis['ebitda_margin']['target'],
-                    status=kpis['ebitda_margin']['status']
+                    status=kpis['ebitda_margin']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col4:
@@ -697,7 +755,8 @@ def main():
                     "Working Capital", 
                     kpis['working_capital']['value'], 
                     'currency',
-                    status=kpis['working_capital']['status']
+                    status=kpis['working_capital']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             # Cash Conversion Cycle
@@ -711,7 +770,8 @@ def main():
                     kpis['dso']['value'], 
                     'days',
                     target=kpis['dso']['target'],
-                    status=kpis['dso']['status']
+                    status=kpis['dso']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col2:
@@ -720,7 +780,8 @@ def main():
                     kpis['dio']['value'], 
                     'days',
                     target=kpis['dio']['target'],
-                    status=kpis['dio']['status']
+                    status=kpis['dio']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col3:
@@ -729,7 +790,8 @@ def main():
                     kpis['dpo']['value'], 
                     'days',
                     target=kpis['dpo']['target'],
-                    status=kpis['dpo']['status']
+                    status=kpis['dpo']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             # Additional KPIs
@@ -743,7 +805,8 @@ def main():
                     kpis['revenue_growth']['value'], 
                     'percentage',
                     target=kpis['revenue_growth']['target'],
-                    status=kpis['revenue_growth']['status']
+                    status=kpis['revenue_growth']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col2:
@@ -752,7 +815,8 @@ def main():
                     kpis['sga_percentage']['value'], 
                     'percentage',
                     target=kpis['sga_percentage']['target'],
-                    status=kpis['sga_percentage']['status']
+                    status=kpis['sga_percentage']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col3:
@@ -760,7 +824,8 @@ def main():
                     "Change in AR", 
                     kpis['ar_change']['value'], 
                     'currency',
-                    status=kpis['ar_change']['status']
+                    status=kpis['ar_change']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             with col4:
@@ -769,7 +834,8 @@ def main():
                     kpis['net_debt_to_ebitda']['value'], 
                     'ratio',
                     target=kpis['net_debt_to_ebitda']['target'],
-                    status=kpis['net_debt_to_ebitda']['status']
+                    status=kpis['net_debt_to_ebitda']['status'],
+                    show_targets=show_targets
                 ), unsafe_allow_html=True)
             
             # Charts

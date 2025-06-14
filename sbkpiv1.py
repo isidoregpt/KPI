@@ -340,9 +340,11 @@ def create_executive_charts(financial_data):
     # KPI Summary Gauge Chart
     fig3 = make_subplots(
         rows=2, cols=2,
-        subplot_titles=('DSO (Days)', 'DPO (Days)', 'EBITDA Margin (%)', 'Revenue Growth (%)'),
+        subplot_titles=('Days Sales Outstanding', 'Days Payables Outstanding', 'EBITDA Margin', 'Revenue Growth'),
         specs=[[{'type': 'indicator'}, {'type': 'indicator'}],
-               [{'type': 'indicator'}, {'type': 'indicator'}]]
+               [{'type': 'indicator'}, {'type': 'indicator'}]],
+        vertical_spacing=0.15,
+        horizontal_spacing=0.1
     )
     
     # Calculate current KPIs for gauges
@@ -354,18 +356,20 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['dso']['value'],
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            title = {'text': "DSO"},
+            number = {'suffix': " days", 'font': {'size': 20, 'color': "#1f2937"}},
             gauge = {
-                'axis': {'range': [None, 60]},
-                'bar': {'color': "#3b82f6"},
+                'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                'bar': {'color': "#3b82f6", 'thickness': 0.7},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#e5e7eb",
                 'steps': [
                     {'range': [0, 30], 'color': "#dcfce7"},
                     {'range': [30, 45], 'color': "#fef3c7"},
                     {'range': [45, 60], 'color': "#fee2e2"}],
                 'threshold': {
-                    'line': {'color': "red", 'width': 4},
-                    'thickness': 0.75,
+                    'line': {'color': "#ef4444", 'width': 3},
+                    'thickness': 0.8,
                     'value': 45}}),
             row=1, col=1)
         
@@ -373,18 +377,20 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['dpo']['value'],
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            title = {'text': "DPO"},
+            number = {'suffix': " days", 'font': {'size': 20, 'color': "#1f2937"}},
             gauge = {
-                'axis': {'range': [None, 60]},
-                'bar': {'color': "#10b981"},
+                'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                'bar': {'color': "#10b981", 'thickness': 0.7},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#e5e7eb",
                 'steps': [
                     {'range': [0, 20], 'color': "#fee2e2"},
                     {'range': [20, 35], 'color': "#fef3c7"},
                     {'range': [35, 60], 'color': "#dcfce7"}],
                 'threshold': {
-                    'line': {'color': "green", 'width': 4},
-                    'thickness': 0.75,
+                    'line': {'color': "#10b981", 'width': 3},
+                    'thickness': 0.8,
                     'value': 30}}),
             row=1, col=2)
         
@@ -392,18 +398,20 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['ebitda_margin']['value'],
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            title = {'text': "EBITDA Margin"},
+            number = {'suffix': "%", 'font': {'size': 20, 'color': "#1f2937"}},
             gauge = {
-                'axis': {'range': [None, 25]},
-                'bar': {'color': "#f59e0b"},
+                'axis': {'range': [None, 25], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                'bar': {'color': "#f59e0b", 'thickness': 0.7},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#e5e7eb",
                 'steps': [
                     {'range': [0, 8], 'color': "#fee2e2"},
                     {'range': [8, 15], 'color': "#fef3c7"},
                     {'range': [15, 25], 'color': "#dcfce7"}],
                 'threshold': {
-                    'line': {'color': "green", 'width': 4},
-                    'thickness': 0.75,
+                    'line': {'color': "#10b981", 'width': 3},
+                    'thickness': 0.8,
                     'value': 12}}),
             row=2, col=1)
         
@@ -411,24 +419,29 @@ def create_executive_charts(financial_data):
         fig3.add_trace(go.Indicator(
             mode = "gauge+number",
             value = kpis['revenue_growth']['value'],
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            title = {'text': "Revenue Growth"},
+            number = {'suffix': "%", 'font': {'size': 20, 'color': "#1f2937"}},
             gauge = {
-                'axis': {'range': [-10, 30]},
-                'bar': {'color': "#8b5cf6"},
+                'axis': {'range': [-10, 30], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                'bar': {'color': "#8b5cf6", 'thickness': 0.7},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#e5e7eb",
                 'steps': [
                     {'range': [-10, 5], 'color': "#fee2e2"},
                     {'range': [5, 15], 'color': "#fef3c7"},
                     {'range': [15, 30], 'color': "#dcfce7"}],
                 'threshold': {
-                    'line': {'color': "green", 'width': 4},
-                    'thickness': 0.75,
+                    'line': {'color': "#10b981", 'width': 3},
+                    'thickness': 0.8,
                     'value': 15}}),
             row=2, col=2)
     
     fig3.update_layout(
-        height=500,
-        font=dict(family="Arial, sans-serif", size=12)
+        height=550,
+        font=dict(family="Arial, sans-serif", size=12),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=20, r=20, t=60, b=20)
     )
     
     return fig1, fig2, fig3

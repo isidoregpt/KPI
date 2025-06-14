@@ -793,13 +793,7 @@ def main():
             - Uses pandas and openpyxl for Excel file processing
             - Designed for Superior Biologics' specific chart of accounts structure
             - Compatible with standard corporate Excel formats
-            
-            **Version:** 1.0.0  
-            **Last Updated:** December 2024  
-            **Designed for:** Fortune 50 Executive Review
-            
-            **Support:**
-            For technical issues or questions about KPI calculations, please contact your IT or Finance team.
+           
             """)
     
     # Initialize session state

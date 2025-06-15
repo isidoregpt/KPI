@@ -1167,113 +1167,144 @@ def create_executive_charts(financial_data: Dict, kpis: Dict[str, KPIResult] = N
         
         # Only create gauges if we have KPI data
         if kpis:
-            # DSO Gauge
-            fig3.add_trace(go.Indicator(
-                mode="gauge+number",
-                value=kpis['dso'].value,
-                number={
-                    'suffix': " days", 
-                    'font': {'size': 20, 'color': "#1f2937"},
-                    'valueformat': '.1f'
-                },
-                domain={'x': [0, 1], 'y': [0, 1]},
-                gauge={
-                    'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
-                    'bar': {'color': "#3b82f6", 'thickness': 0.7},
-                    'bgcolor': "white",
-                    'borderwidth': 2,
-                    'bordercolor': "#e5e7eb",
-                    'steps': [
-                        {'range': [0, 30], 'color': "#dcfce7"},
-                        {'range': [30, 45], 'color': "#fef3c7"},
-                        {'range': [45, 60], 'color': "#fee2e2"}],
-                    'threshold': {
-                        'line': {'color': "#ef4444", 'width': 3},
-                        'thickness': 0.8,
-                        'value': 45}
-                }
-            ), row=1, col=1)
-            
-            # DPO Gauge  
-            fig3.add_trace(go.Indicator(
-                mode="gauge+number",
-                value=kpis['dpo'].value,
-                number={
-                    'suffix': " days", 
-                    'font': {'size': 20, 'color': "#1f2937"},
-                    'valueformat': '.1f'
-                },
-                domain={'x': [0, 1], 'y': [0, 1]},
-                gauge={
-                    'axis': {'range': [None, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
-                    'bar': {'color': "#10b981", 'thickness': 0.7},
-                    'bgcolor': "white",
-                    'borderwidth': 2,
-                    'bordercolor': "#e5e7eb",
-                    'steps': [
-                        {'range': [0, 20], 'color': "#fee2e2"},
-                        {'range': [20, 35], 'color': "#fef3c7"},
-                        {'range': [35, 60], 'color': "#dcfce7"}],
-                    'threshold': {
-                        'line': {'color': "#10b981", 'width': 3},
-                        'thickness': 0.8,
-                        'value': 30}
-                }
-            ), row=1, col=2)
-            
-            # EBITDA Margin Gauge
-            fig3.add_trace(go.Indicator(
-                mode="gauge+number",
-                value=kpis['ebitda_margin'].value,
-                number={
-                    'suffix': "%", 
-                    'font': {'size': 20, 'color': "#1f2937"},
-                    'valueformat': '.2f'
-                },
-                domain={'x': [0, 1], 'y': [0, 1]},
-                gauge={
-                    'axis': {'range': [None, 25], 'tickwidth': 1, 'tickcolor': "#6b7280"},
-                    'bar': {'color': "#f59e0b", 'thickness': 0.7},
-                    'bgcolor': "white",
-                    'borderwidth': 2,
-                    'bordercolor': "#e5e7eb",
-                    'steps': [
-                        {'range': [0, 8], 'color': "#fee2e2"},
-                        {'range': [8, 15], 'color': "#fef3c7"},
-                        {'range': [15, 25], 'color': "#dcfce7"}],
-                    'threshold': {
-                        'line': {'color': "#10b981", 'width': 3},
-                        'thickness': 0.8,
-                        'value': 12}
-                }
-            ), row=2, col=1)
-            
-            # Revenue Growth Gauge
-            fig3.add_trace(go.Indicator(
-                mode="gauge+number",
-                value=kpis['revenue_growth'].value,
-                number={
-                    'suffix': "%", 
-                    'font': {'size': 20, 'color': "#1f2937"},
-                    'valueformat': '.2f'
-                },
-                domain={'x': [0, 1], 'y': [0, 1]},
-                gauge={
-                    'axis': {'range': [-10, 30], 'tickwidth': 1, 'tickcolor': "#6b7280"},
-                    'bar': {'color': "#8b5cf6", 'thickness': 0.7},
-                    'bgcolor': "white",
-                    'borderwidth': 2,
-                    'bordercolor': "#e5e7eb",
-                    'steps': [
-                        {'range': [-10, 5], 'color': "#fee2e2"},
-                        {'range': [5, 15], 'color': "#fef3c7"},
-                        {'range': [15, 30], 'color': "#dcfce7"}],
-                    'threshold': {
-                        'line': {'color': "#10b981", 'width': 3},
-                        'thickness': 0.8,
-                        'value': 15}
-                }
-            ), row=2, col=2)
+            try:
+                # Debug: Check if KPI values exist
+                dso_value = kpis.get('dso', {}).value if 'dso' in kpis else 0
+                dpo_value = kpis.get('dpo', {}).value if 'dpo' in kpis else 0
+                ebitda_value = kpis.get('ebitda_margin', {}).value if 'ebitda_margin' in kpis else 0
+                growth_value = kpis.get('revenue_growth', {}).value if 'revenue_growth' in kpis else 0
+                
+                # DSO Gauge
+                fig3.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=max(0, dso_value),  # Ensure non-negative
+                    number={
+                        'suffix': " days", 
+                        'font': {'size': 20, 'color': "#1f2937"},
+                        'valueformat': '.1f'
+                    },
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    gauge={
+                        'axis': {'range': [0, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                        'bar': {'color': "#3b82f6", 'thickness': 0.7},
+                        'bgcolor': "white",
+                        'borderwidth': 2,
+                        'bordercolor': "#e5e7eb",
+                        'steps': [
+                            {'range': [0, 30], 'color': "#dcfce7"},
+                            {'range': [30, 45], 'color': "#fef3c7"},
+                            {'range': [45, 60], 'color': "#fee2e2"}],
+                        'threshold': {
+                            'line': {'color': "#ef4444", 'width': 3},
+                            'thickness': 0.8,
+                            'value': 45}
+                    }
+                ), row=1, col=1)
+                
+                # DPO Gauge  
+                fig3.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=max(0, dpo_value),  # Ensure non-negative
+                    number={
+                        'suffix': " days", 
+                        'font': {'size': 20, 'color': "#1f2937"},
+                        'valueformat': '.1f'
+                    },
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    gauge={
+                        'axis': {'range': [0, 60], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                        'bar': {'color': "#10b981", 'thickness': 0.7},
+                        'bgcolor': "white",
+                        'borderwidth': 2,
+                        'bordercolor': "#e5e7eb",
+                        'steps': [
+                            {'range': [0, 20], 'color': "#fee2e2"},
+                            {'range': [20, 35], 'color': "#fef3c7"},
+                            {'range': [35, 60], 'color': "#dcfce7"}],
+                        'threshold': {
+                            'line': {'color': "#10b981", 'width': 3},
+                            'thickness': 0.8,
+                            'value': 30}
+                    }
+                ), row=1, col=2)
+                
+                # EBITDA Margin Gauge
+                fig3.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=max(0, ebitda_value),  # Ensure non-negative
+                    number={
+                        'suffix': "%", 
+                        'font': {'size': 20, 'color': "#1f2937"},
+                        'valueformat': '.2f'
+                    },
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    gauge={
+                        'axis': {'range': [0, 25], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                        'bar': {'color': "#f59e0b", 'thickness': 0.7},
+                        'bgcolor': "white",
+                        'borderwidth': 2,
+                        'bordercolor': "#e5e7eb",
+                        'steps': [
+                            {'range': [0, 8], 'color': "#fee2e2"},
+                            {'range': [8, 15], 'color': "#fef3c7"},
+                            {'range': [15, 25], 'color': "#dcfce7"}],
+                        'threshold': {
+                            'line': {'color': "#10b981", 'width': 3},
+                            'thickness': 0.8,
+                            'value': 12}
+                    }
+                ), row=2, col=1)
+                
+                # Revenue Growth Gauge
+                fig3.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=growth_value,  # Allow negative values for growth
+                    number={
+                        'suffix': "%", 
+                        'font': {'size': 20, 'color': "#1f2937"},
+                        'valueformat': '.2f'
+                    },
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    gauge={
+                        'axis': {'range': [-10, 30], 'tickwidth': 1, 'tickcolor': "#6b7280"},
+                        'bar': {'color': "#8b5cf6", 'thickness': 0.7},
+                        'bgcolor': "white",
+                        'borderwidth': 2,
+                        'bordercolor': "#e5e7eb",
+                        'steps': [
+                            {'range': [-10, 5], 'color': "#fee2e2"},
+                            {'range': [5, 15], 'color': "#fef3c7"},
+                            {'range': [15, 30], 'color': "#dcfce7"}],
+                        'threshold': {
+                            'line': {'color': "#10b981", 'width': 3},
+                            'thickness': 0.8,
+                            'value': 15}
+                    }
+                ), row=2, col=2)
+                
+                # Log debug information
+                logger.info(f"Gauge values - DSO: {dso_value}, DPO: {dpo_value}, EBITDA: {ebitda_value}, Growth: {growth_value}")
+                
+            except Exception as gauge_error:
+                logger.error(f"Error creating individual gauges: {str(gauge_error)}")
+                # Fallback to simple gauges
+                for i, (row, col) in enumerate([(1,1), (1,2), (2,1), (2,2)]):
+                    fig3.add_trace(go.Indicator(
+                        mode="gauge+number",
+                        value=0,
+                        domain={'x': [0, 1], 'y': [0, 1]},
+                        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "#6b7280"}},
+                    ), row=row, col=col)
+        else:
+            # No KPI data available - show placeholder gauges
+            logger.warning("No KPI data available for gauges")
+            for i, (row, col) in enumerate([(1,1), (1,2), (2,1), (2,2)]):
+                fig3.add_trace(go.Indicator(
+                    mode="gauge+number",
+                    value=0,
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "#cbd5e0"}},
+                ), row=row, col=col)
         
         fig3.update_layout(
             height=550,
@@ -1639,8 +1670,35 @@ def main():
                 with col4:
                     st.markdown(create_kpi_card(kpis['net_debt_to_ebitda'], show_targets), unsafe_allow_html=True)
                 
-                # Charts
-                st.markdown("## 📈 Financial Performance Analysis")
+                # Debug: Show KPI calculation status
+                if show_confidence:
+                    with st.expander("🔧 Debug: KPI Calculation Status"):
+                        st.write("**KPI Values for Gauges:**")
+                        
+                        debug_kpis = ['dso', 'dpo', 'ebitda_margin', 'revenue_growth']
+                        for kpi_name in debug_kpis:
+                            if kpi_name in kpis:
+                                kpi_obj = kpis[kpi_name]
+                                st.write(f"• **{kpi_obj.name}**: {kpi_obj.value:.2f} ({kpi_obj.status.value})")
+                                if hasattr(kpi_obj, 'audit') and kpi_obj.audit:
+                                    st.write(f"  └─ Confidence: {kpi_obj.audit.confidence*100:.0f}%")
+                            else:
+                                st.write(f"• **{kpi_name}**: Missing from calculations")
+                        
+                        # Show underlying data for DSO/DPO
+                        if financial_data:
+                            st.write("**Underlying Data (Latest Month):**")
+                            st.write(f"• Revenue: ${financial_data['revenue'][-1]:,.0f}")
+                            st.write(f"• Accounts Receivable: ${financial_data['accounts_receivable'][-1]:,.0f}")
+                            st.write(f"• Accounts Payable: ${financial_data['accounts_payable'][-1]:,.0f}")
+                            st.write(f"• Inventory: ${financial_data['inventory'][-1]:,.0f}")
+                            
+                            # Manual DSO/DPO calculation for verification
+                            if financial_data['revenue'][-1] > 0:
+                                manual_dso = (financial_data['accounts_receivable'][-1] / financial_data['revenue'][-1]) * 30
+                                manual_dpo = (financial_data['accounts_payable'][-1] / financial_data['revenue'][-1]) * 30
+                                st.write(f"• **Manual DSO Calculation**: {manual_dso:.1f} days")
+                                st.write(f"• **Manual DPO Calculation**: {manual_dpo:.1f} days")
                 
                 fig1, fig2, fig3 = create_executive_charts(financial_data, kpis)
                 
